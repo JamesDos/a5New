@@ -22,7 +22,7 @@ public class McDiver implements SewerDiver {
         // If you don't succeed, you can always use the first one.
         //
         // Use this same process on the second method, scram.
-        dfsWalk(state);
+        dfsWalk(state, new HashSet<>());
     }
 
     /**
@@ -32,17 +32,20 @@ public class McDiver implements SewerDiver {
      * Requires current is unvisited
      */
 
-    public static void dfsWalk(SeekState s){
-        if(s.distanceToRing() == 0) return;
-
-        HashSet<Long> visited = new HashSet<>();
+    public static void dfsWalk(SeekState s, HashSet<Long> visited){
+        if(s.distanceToRing() == 0){
+            return;
+        }
         long current = s.currentLocation();
         visited.add(current);
         for (NodeStatus neighbor : s.neighbors()) {
             if (!visited.contains(neighbor.getId())) {
                 s.moveTo(neighbor.getId());
                 // s is now the seek state of neighbor
-                dfsWalk(s);
+                dfsWalk(s, visited);
+                if(s.distanceToRing() == 0){
+                    return;
+                }
                 s.moveTo(current);
             }
         }

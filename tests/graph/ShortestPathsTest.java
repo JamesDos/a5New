@@ -25,6 +25,13 @@ public class ShortestPathsTest {
         {4, 5, 3}, {4, 6, 20},
         {5, 6, 16}
     };
+    static final String[] vertices2 = { "a", "b", "c", "d", "e"};
+    static final int[][] edges2 = {
+            {0, 1, 1}, {0, 4, 2},
+            {1, 2, 1},
+            {2, 3, 1},
+            {3, 4, 1}
+    };
     static class TestGraph implements WeightedDigraph<String, int[]> {
         int[][] edges;
         String[] vertices;
@@ -49,6 +56,9 @@ public class ShortestPathsTest {
     static TestGraph testGraph1() {
         return new TestGraph(vertices1, edges1);
     }
+    static TestGraph testGraph2() {
+        return new TestGraph(vertices2, edges2);
+    }
 
     @Test
     void lectureNotesTest() {
@@ -66,4 +76,24 @@ public class ShortestPathsTest {
     }
 
     // TODO: Add 2 more tests
+
+    // Edge Case: Graph consists of 1 vertex
+
+    // Edge Case: Graph consists of vertices with no edges
+
+    // Greedy method shouldn't fail
+    @ Test
+    void graph2Test(){
+        TestGraph graph = testGraph2();
+        ShortestPaths<String, int[]> ssp = new ShortestPaths<>(graph);
+        ssp.singleSourceDistances("a");
+        assertEquals(2, ssp.getDistance("e"));
+        StringBuilder sb = new StringBuilder();
+        sb.append("best path:");
+        for (int[] e : ssp.bestPath("e")) {
+            sb.append(" " + vertices1[e[0]]);
+        }
+        sb.append(" e");
+        assertEquals("best path: a e", sb.toString());
+    }
 }
