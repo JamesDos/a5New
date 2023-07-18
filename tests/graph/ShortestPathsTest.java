@@ -32,6 +32,23 @@ public class ShortestPathsTest {
             {2, 3, 1},
             {3, 4, 1}
     };
+/*               D
+*              /   \
+*       A --- B --- C
+*              \   /
+*                E
+* directional cyclic graph i.e  B -> C -> D -> B
+* best path is A -> B - E
+* */
+    static final String[] vertices3 = {"a", "b", "c", "d", "e"};
+    static final int[][] edges3 = {
+            {0,1,1},
+            {1,2,1},{1,4,2},
+            {2,3,1},{2,4,2},
+            {3,1,1}
+    };
+
+
     static class TestGraph implements WeightedDigraph<String, int[]> {
         int[][] edges;
         String[] vertices;
@@ -58,6 +75,9 @@ public class ShortestPathsTest {
     }
     static TestGraph testGraph2() {
         return new TestGraph(vertices2, edges2);
+    }
+    static TestGraph testGraph3() {
+        return new TestGraph(vertices3, edges3);
     }
 
     @Test
@@ -95,5 +115,19 @@ public class ShortestPathsTest {
         }
         sb.append(" e");
         assertEquals("best path: a e", sb.toString());
+    }
+    @Test
+    void graph3Test(){
+        TestGraph graph = testGraph3();
+        ShortestPaths<String, int[]> ssp = new ShortestPaths<>(graph);
+        ssp.singleSourceDistances("a");
+        assertEquals(3, ssp.getDistance("e"));
+        StringBuilder sb = new StringBuilder();
+        sb.append("best path:");
+        for (int[] e : ssp.bestPath("e")) {
+            sb.append(" " + vertices3[e[0]]);
+        }
+        sb.append(" e");
+        assertEquals("best path: a b e", sb.toString());
     }
 }
