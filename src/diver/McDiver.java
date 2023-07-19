@@ -1,7 +1,11 @@
 package diver;
 
 import game.*;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Collections;
+import java.util.List;
+import java.util.Stack;
 
 
 /** This is the place for your implementation of the {@code SewerDiver}.
@@ -38,7 +42,11 @@ public class McDiver implements SewerDiver {
         }
         long current = s.currentLocation();
         visited.add(current);
-        for (NodeStatus neighbor : s.neighbors()) {
+        // Create list of pointers for neighbors
+        List<NodeStatus> sortedNode = (List<NodeStatus>) s.neighbors();
+        //
+        Collections.sort(sortedNode);
+        for (NodeStatus neighbor : sortedNode) {
             if (!visited.contains(neighbor.getId())) {
                 s.moveTo(neighbor.getId());
                 // s is now the seek state of neighbor
