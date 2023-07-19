@@ -97,9 +97,21 @@ public class ShortestPathsTest {
 
     // TODO: Add 2 more tests
 
-    // Edge Case: Graph consists of 1 vertex
-
-    // Edge Case: Graph consists of vertices with no edges
+    @Test
+    // Shortest path from 'a' to 'e' should be along shortest path from 'a' to 'g'
+    void lectureNotesTest2() {
+        TestGraph graph = testGraph1();
+        ShortestPaths<String, int[]> ssp = new ShortestPaths<>(graph);
+        ssp.singleSourceDistances("a");
+        assertEquals(31, ssp.getDistance("e"));
+        StringBuilder sb = new StringBuilder();
+        sb.append("best path:");
+        for (int[] e : ssp.bestPath("e")) {
+            sb.append(" " + vertices1[e[0]]);
+        }
+        sb.append(" e");
+        assertEquals("best path: a c e", sb.toString());
+    }
 
     // Greedy method shouldn't fail
     @ Test

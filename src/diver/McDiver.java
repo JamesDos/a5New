@@ -1,11 +1,18 @@
 package diver;
 
 import game.*;
+import graph.ShortestPaths;
+import graph.WeightedDigraph;
+import java.sql.SQLOutput;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Set;
 import java.util.HashSet;
 import java.util.Collections;
 import java.util.List;
 import java.util.Stack;
+import java.util.Map;
+import java.util.HashMap;
 
 
 /** This is the place for your implementation of the {@code SewerDiver}.
@@ -43,9 +50,13 @@ public class McDiver implements SewerDiver {
         long current = s.currentLocation();
         visited.add(current);
         // Create list of pointers for neighbors
-        List<NodeStatus> sortedNode = (List<NodeStatus>) s.neighbors();
-        //
+        List<NodeStatus> sortedNode = new ArrayList<>(s.neighbors());
         Collections.sort(sortedNode);
+        System.out.println("Current: " + current);
+        System.out.println("Size: " + sortedNode.size());
+        for(NodeStatus n: sortedNode){
+            System.out.println(n.getId() + " " + n.getDistanceToRing());
+        }
         for (NodeStatus neighbor : sortedNode) {
             if (!visited.contains(neighbor.getId())) {
                 s.moveTo(neighbor.getId());
@@ -65,6 +76,24 @@ public class McDiver implements SewerDiver {
         // TODO: Get out of the sewer system before the steps are used up.
         // DO NOT WRITE ALL THE CODE HERE. Instead, write your method elsewhere,
         // with a good specification, and call it from this one.
+        basicScram(state);
     }
+    /**
+     * Helper method used by scram() that uses dijkstra's to walk McDiver to exit along the
+     * shortest possible path.
+     */
+    public void basicScram(ScramState s){
+        Set<Node> nodeSet = new HashSet<>(s.allNodes());
+        Maze graph = new Maze(nodeSet);
+        ShortestPaths<Node, Edge> ssp = new ShortestPaths<>(graph);
+        Node start = s.currentNode();
+        Node exit = s.exit();
+        ssp.singleSourceDistances(start);
+        List<Edge> bestPath = ssp.bestPath(exit);
+        for(Edge e: bestPath){
+            s.moveTo(e.destination());
+        }
+    }
+
 
 }
