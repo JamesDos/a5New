@@ -41,6 +41,7 @@ public class Heap<T> implements PQueue<T> {
         isMinHeap = isMin;
         b = new Heap.Pair[10];
         map = new HashMap<>();
+        size = 0;
     }
 
     /**
@@ -59,6 +60,9 @@ public class Heap<T> implements PQueue<T> {
 
         // The body is most easily written using a method in Collections Framework
         // class Arrays. Look for methods that copy arrays and choose a suitable one.
+        if(size == b.length){
+            b = Arrays.copyOf(b, size()*2);
+        }
     }
 
     /**
@@ -76,6 +80,14 @@ public class Heap<T> implements PQueue<T> {
         // Do NOT call bubbleUp until the class invariant is true
         // (except for the need to bubble up).
         // Calling bubbleUp is the last thing to be done.
+        if(map.containsKey(v)){
+            throw new IllegalArgumentException();
+        }
+        ensureSpace();
+        // add element to leaf
+        b[size()-1] = new Pair(v, p);
+        map.put(v, size()-1);
+        bubbleUp(map.get(v));
     }
 
     /**
@@ -102,6 +114,13 @@ public class Heap<T> implements PQueue<T> {
         // will find no errors.
         //
         // Read the Assignment A5 note about map.put(...).
+        int kIndex = map.get(b[k].value);
+        int hIndex = map.get(b[h].value);
+        Pair temp = b[k];
+        b[k] = b[h];
+        b[h] = temp;
+        map.put(b[k].value, hIndex);
+        map.put(b[h].value, kIndex);
     }
 
     /**
@@ -144,7 +163,16 @@ public class Heap<T> implements PQueue<T> {
 
         // Use the compareTo methods to test whether value h is in its right place.
         // That way, YOU don't have to worry about whether it is a min- or max-heap!
-
+        if(h>=size) return;
+        int indexOfParent = (h-1)/2;
+        boolean isDone = false;
+        while (!isDone) {
+            if(compareTo(h, indexOfParent) > 0){
+                swap(h, indexOfParent);
+            } else{
+                isDone = true;
+            }
+        }
     }
 
     /**
@@ -156,7 +184,10 @@ public class Heap<T> implements PQueue<T> {
      */
     public T peek() {
         // TODO 5: Do peek. This is an easy one.
-        return null;
+        if(isEmpty()){
+            throw new IllegalArgumentException();
+        }
+        return b[0].value;
     }
 
     /**

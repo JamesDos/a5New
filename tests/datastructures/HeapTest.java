@@ -43,4 +43,8 @@ public class HeapTest {
     // TODO: Add your own test cases here. Make sure to test your code with good
     // coverage, and with both in min and max modes. Some example test cases have been
     // provided for you.
+    @ Test void ensureSpaceTest(){
+        PQueue<Integer> q = new Heap<>(true);
+
+    }
 }

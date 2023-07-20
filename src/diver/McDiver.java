@@ -6,6 +6,8 @@ import graph.WeightedDigraph;
 import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Collections;
@@ -76,6 +78,7 @@ public class McDiver implements SewerDiver {
         // TODO: Get out of the sewer system before the steps are used up.
         // DO NOT WRITE ALL THE CODE HERE. Instead, write your method elsewhere,
         // with a good specification, and call it from this one.
+        //basicScram(state);
         basicScram(state);
     }
     /**
@@ -91,6 +94,56 @@ public class McDiver implements SewerDiver {
         ssp.singleSourceDistances(start);
         List<Edge> bestPath = ssp.bestPath(exit);
         for(Edge e: bestPath){
+            s.moveTo(e.destination());
+        }
+    }
+
+    public void maxScram(ScramState s){
+        // Uses bfs to search all possible paths from starting node any node in graph
+        Set<Node> nodeSet = new HashSet<>(s.allNodes());
+        Maze graph = new Maze(nodeSet);
+        Node start = s.currentNode();
+        Node exit = s.exit();
+        Queue<Node> frontier = new LinkedList<>();
+        Map<Node, Integer> visited = new HashMap<>();
+        Map<List<Edge>, Integer> allPaths = new HashMap<>();
+        frontier.add(start);
+        while(!frontier.isEmpty()){
+            Node curr = frontier.poll();
+            int currVal = curr.getTile().coins();
+            visited.put(curr, 0);
+            for(Node neighbor: curr.getNeighbors()){
+                int nVal = currVal + neighbor.getTile().coins();
+                List<Edge> path = new LinkedList<>();
+                path.add(curr.getEdge(neighbor));
+                if(!visited.containsKey(neighbor)){
+                    visited.put(neighbor, nVal);
+                    frontier.add(neighbor);
+                    allPaths.put(path, nVal);
+                } else{
+                    if(nVal > visited.get(neighbor)){
+                        allPaths.put(path, nVal);
+                    }
+                }
+            }
+        }
+        int max = 0;
+        List<Edge> greatest = new ArrayList<>();
+        for(List<Edge> key: allPaths.keySet()){
+            if (allPaths.get(key) > max){
+                max = allPaths.get(key);
+                greatest = key;
+            }
+        }
+        for(Edge e: greatest){
+            ShortestPaths<Node, Edge> ssp = new ShortestPaths<>(graph);
+            ssp.singleSourceDistances(e.source());
+            if((double)s.stepsToGo() == ssp.getDistance(exit)){
+                List<Edge> bestPath = ssp.bestPath(exit);
+                    for(Edge edge: bestPath){
+                        s.moveTo(edge.destination());
+                    }return;
+            }
             s.moveTo(e.destination());
         }
     }

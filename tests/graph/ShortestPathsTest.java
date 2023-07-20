@@ -48,6 +48,16 @@ public class ShortestPathsTest {
             {3,1,1}
     };
 
+    // Undirected graph from lecture
+    static final String[] vertices4 = {"a", "s", "b", "c", "d"};
+    static final int[][] edges4 = {
+            {0,1,1}, {0,2,7}, {0,3,6},
+            {1,0,1}, {1,2,2},
+            {2,0,7}, {2,1,2}, {2,3,4}, {2,4,1},
+            {3,0,6}, {3,2,4}, {3,4,1},
+            {4,2,1},{4,3,1}
+    };
+
 
     static class TestGraph implements WeightedDigraph<String, int[]> {
         int[][] edges;
@@ -78,6 +88,9 @@ public class ShortestPathsTest {
     }
     static TestGraph testGraph3() {
         return new TestGraph(vertices3, edges3);
+    }
+    static TestGraph testGraph4() {
+        return new TestGraph(vertices4, edges4);
     }
 
     @Test
@@ -141,5 +154,20 @@ public class ShortestPathsTest {
         }
         sb.append(" e");
         assertEquals("best path: a b e", sb.toString());
+    }
+
+    @ Test
+    void graph4Test(){
+        TestGraph graph = testGraph4();
+        ShortestPaths<String, int[]> ssp = new ShortestPaths<>(graph);
+        ssp.singleSourceDistances("a");
+        assertEquals(3, ssp.getDistance("b"));
+        StringBuilder sb = new StringBuilder();
+        sb.append("best path:");
+        for (int[] e : ssp.bestPath("b")) {
+            sb.append(" " + vertices4[e[0]]);
+        }
+        sb.append(" b");
+        assertEquals("best path: a s b", sb.toString());
     }
 }
