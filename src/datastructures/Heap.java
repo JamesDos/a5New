@@ -85,6 +85,7 @@ public class Heap<T> implements PQueue<T> {
         }
         ensureSpace();
         // add element to leaf
+        size ++;
         b[size()-1] = new Pair(v, p);
         map.put(v, size()-1);
         bubbleUp(map.get(v));
@@ -163,12 +164,14 @@ public class Heap<T> implements PQueue<T> {
 
         // Use the compareTo methods to test whether value h is in its right place.
         // That way, YOU don't have to worry about whether it is a min- or max-heap!
+        assert h >= 0;
         if(h>=size) return;
-        int indexOfParent = (h-1)/2;
         boolean isDone = false;
         while (!isDone) {
+            int indexOfParent = (h-1)/2;
             if(compareTo(h, indexOfParent) > 0){
                 swap(h, indexOfParent);
+                h = indexOfParent;
             } else{
                 isDone = true;
             }
@@ -184,9 +187,7 @@ public class Heap<T> implements PQueue<T> {
      */
     public T peek() {
         // TODO 5: Do peek. This is an easy one.
-        if(isEmpty()){
-            throw new IllegalArgumentException();
-        }
+        if(isEmpty()) throw new IllegalArgumentException();
         return b[0].value;
     }
 
@@ -214,6 +215,23 @@ public class Heap<T> implements PQueue<T> {
      */
     void bubbleDown(int h) {
         // TODO 6: DO NOT USE RECURSION. Use iteration.
+        if (h < 0 || size <= h) return;
+        boolean isDone = false;
+        while(!isDone){
+            int LChild = 2*h + 1;
+            int RChild = 2*h + 2;
+            // Compares the priority of both children and chooses the higher priority child
+            // if priority of LChild == RChild, higherPrio would be LChild
+            int higherPrio = (compareTo(LChild, RChild) > -1)? LChild: RChild;
+            if(compareTo(h, higherPrio) < 0) {
+                swap(h, higherPrio);
+                h = higherPrio;
+            }
+            else{
+                isDone = true;
+            }
+        }
+
     }
 
     /**
@@ -239,7 +257,14 @@ public class Heap<T> implements PQueue<T> {
      */
     public T extractMin() {
         // TODO 7:
-        return null;
+        if(isEmpty()) throw new IllegalArgumentException();
+        T output = b[0].value;
+        System.out.println(map.get(output));
+        swap(0, map.get(b[size()-1].value));
+        b[size()-1] = null;
+        size -= 1;
+        bubbleDown(0);
+        return output;
     }
 
     /**
