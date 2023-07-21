@@ -43,7 +43,7 @@ public class HeapTest {
     // TODO: Add your own test cases here. Make sure to test your code with good
     // coverage, and with both in min and max modes. Some example test cases have been
     // provided for you.
-    @ Test void todo1to5Test(){
+    @ Test void todo1to8Test(){
         // Test multiple resizes on minHeap and maxHeap
         PQueue<Integer> minHeap = new Heap<>(true);
         PQueue<Integer> maxHeap = new Heap<>(false);
@@ -74,6 +74,15 @@ public class HeapTest {
         // extractMin should return root node and maintain heap order invariant
         assertEquals(0, minHeap.extractMin());
         assertEquals(25, maxHeap.extractMin());
+        // changing priority should cause bubbling up/down if needed
+        maxHeap.changePriority(11, 50.0);
+        assertEquals(11, maxHeap.extractMin());
+        minHeap.changePriority(19, 0.0);
+        assertEquals(19, minHeap.extractMin());
+
+
+
+
 
     }
 }

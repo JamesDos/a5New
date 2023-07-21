@@ -120,8 +120,8 @@ public class Heap<T> implements PQueue<T> {
         Pair temp = b[k];
         b[k] = b[h];
         b[h] = temp;
-        map.put(b[k].value, hIndex);
-        map.put(b[h].value, kIndex);
+        map.put(b[k].value, kIndex);
+        map.put(b[h].value, hIndex);
     }
 
     /**
@@ -220,6 +220,13 @@ public class Heap<T> implements PQueue<T> {
         while(!isDone){
             int LChild = 2*h + 1;
             int RChild = 2*h + 2;
+            // Prevents index out of bounds error when calling compareTo()
+            if(LChild >= size()) return;
+            // Handles case where LChild is the end of the list
+            if(RChild >= size()){
+                swap(h, LChild);
+                return;
+            }
             // Compares the priority of both children and chooses the higher priority child
             // if priority of LChild == RChild, higherPrio would be LChild
             int higherPrio = (compareTo(LChild, RChild) > -1)? LChild: RChild;
@@ -259,7 +266,6 @@ public class Heap<T> implements PQueue<T> {
         // TODO 7:
         if(isEmpty()) throw new IllegalArgumentException();
         T output = b[0].value;
-        System.out.println(map.get(output));
         swap(0, map.get(b[size()-1].value));
         b[size()-1] = null;
         size -= 1;
@@ -276,6 +282,18 @@ public class Heap<T> implements PQueue<T> {
     public void changePriority(T v, double p) {
         // TODO 8: When this method is correct, all testing procedures
         // will find no errors.
+        if(!map.containsKey(v)) throw new IllegalArgumentException();
+        int currIndex = map.get(v);
+        b[currIndex].priority = p;
+        // Bubbles current node up or down if needed due to priority change
+        // If change in priority doesn't violate heap invariant, bubbleUp and bubbleDown
+        // will do nothing
+        System.out.println(toStringPriorities());
+        System.out.println(toStringValues());
+        bubbleUp(currIndex);
+        bubbleDown(currIndex);
+        System.out.println(toStringPriorities());
+        System.out.println(toStringValues());
     }
 
     /**
