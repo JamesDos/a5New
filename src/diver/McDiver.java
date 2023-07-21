@@ -1,5 +1,8 @@
 package diver;
 
+import datastructures.Heap;
+import datastructures.PQueue;
+import datastructures.SlowPQueue;
 import game.*;
 import graph.ShortestPaths;
 import graph.WeightedDigraph;
@@ -79,7 +82,7 @@ public class McDiver implements SewerDiver {
         // DO NOT WRITE ALL THE CODE HERE. Instead, write your method elsewhere,
         // with a good specification, and call it from this one.
         //basicScram(state);
-        basicScram(state);
+        maxScramGreedy(state);
     }
     /**
      * Helper method used by scram() that uses dijkstra's to walk McDiver to exit along the
@@ -102,51 +105,123 @@ public class McDiver implements SewerDiver {
         // Uses bfs to search all possible paths from starting node any node in graph
         Set<Node> nodeSet = new HashSet<>(s.allNodes());
         Maze graph = new Maze(nodeSet);
+        Node exit = s.exit();
+        /**
+        Set<Node> nodeSet = new HashSet<>(s.allNodes());
+        Maze graph = new Maze(nodeSet);
         Node start = s.currentNode();
         Node exit = s.exit();
         Queue<Node> frontier = new LinkedList<>();
-        Map<Node, Integer> visited = new HashMap<>();
-        Map<List<Edge>, Integer> allPaths = new HashMap<>();
+        Map<Node, List<Edge>> visited = new HashMap<>();
+        Heap<List<Edge>> bestPaths = new Heap<>(false);
         frontier.add(start);
+        visited.put(frontier.peek(), new ArrayList<>());
         while(!frontier.isEmpty()){
             Node curr = frontier.poll();
             int currVal = curr.getTile().coins();
-            visited.put(curr, 0);
+            List<Edge> currPath = visited.get(curr);
             for(Node neighbor: curr.getNeighbors()){
+                List<Edge> neighPath = new ArrayList<>(currPath);
                 int nVal = currVal + neighbor.getTile().coins();
-                List<Edge> path = new LinkedList<>();
-                path.add(curr.getEdge(neighbor));
+                neighPath.add(curr.getEdge(neighbor));
                 if(!visited.containsKey(neighbor)){
-                    visited.put(neighbor, nVal);
+                    visited.put(neighbor, neighPath);
                     frontier.add(neighbor);
-                    allPaths.put(path, nVal);
+                    bestPaths.add(neighPath, nVal);
                 } else{
-                    if(nVal > visited.get(neighbor)){
-                        allPaths.put(path, nVal);
+                    if(nVal > bestPaths.peekAtPriority() ){
+                        bestPaths.changePriority(neighPath, nVal);
                     }
                 }
             }
         }
-        int max = 0;
-        List<Edge> greatest = new ArrayList<>();
-        for(List<Edge> key: allPaths.keySet()){
-            if (allPaths.get(key) > max){
-                max = allPaths.get(key);
-                greatest = key;
-            }
-        }
-        for(Edge e: greatest){
-            ShortestPaths<Node, Edge> ssp = new ShortestPaths<>(graph);
-            ssp.singleSourceDistances(e.source());
-            if((double)s.stepsToGo() == ssp.getDistance(exit)){
-                List<Edge> bestPath = ssp.bestPath(exit);
-                    for(Edge edge: bestPath){
+
+        List<Edge> greatest = bestPaths.extractMin();
+        System.out.println("size" + greatest.size());
+        */
+        while(true) {
+            List<Edge> greatest = findBestPath(s);
+            for (Edge e : greatest) {
+                ShortestPaths<Node, Edge> ssp = new ShortestPaths<>(graph);
+                ssp.singleSourceDistances(e.source());
+                if ((double) s.stepsToGo() == ssp.getDistance(exit)) {
+                    System.out.println("in if");
+                    List<Edge> bestPath = ssp.bestPath(exit);
+                    for (Edge edge : bestPath) {
                         s.moveTo(edge.destination());
-                    }return;
+                    }
+                    return;
+                }
+                s.moveTo(e.destination());
             }
-            s.moveTo(e.destination());
         }
     }
+
+    public List<Edge> findBestPath(ScramState s){
+        Node start = s.currentNode();
+        Queue<Node> frontier = new LinkedList<>();
+        Map<Node, List<Edge>> visited = new HashMap<>();
+        Heap<List<Edge>> bestPaths = new Heap<>(false);
+        frontier.add(start);
+        visited.put(frontier.peek(), new ArrayList<>());
+        while(!frontier.isEmpty()){
+            Node curr = frontier.poll();
+            int currVal = curr.getTile().coins();
+            List<Edge> currPath = visited.get(curr);
+            for(Node neighbor: curr.getNeighbors()){
+                List<Edge> neighPath = new ArrayList<>(currPath);
+                int nVal = currVal + neighbor.getTile().coins();
+                neighPath.add(curr.getEdge(neighbor));
+                if(!visited.containsKey(neighbor)){
+                    visited.put(neighbor, neighPath);
+                    frontier.add(neighbor);
+                    bestPaths.add(neighPath, nVal);
+                } else{
+                    if(nVal > bestPaths.peekAtPriority() ){
+                        bestPaths.changePriority(neighPath, nVal);
+                    }
+                }
+            }
+        } return bestPaths.extractMin();
+    }
+
+    public  PQueue<List<Edge>> pathToCoin(ScramState s){
+        Set<Node> nodeSet = new HashSet<>(s.allNodes());
+        Maze graph = new Maze(nodeSet);
+        Node start = s.currentNode();
+        PQueue<List<Edge>> pQueue = new Heap<>(false);
+        for(Node n: s.allNodes()){
+            if(n.getTile().coins() > 0){
+                ShortestPaths<Node, Edge> ssp = new ShortestPaths<>(graph);
+                ssp.singleSourceDistances(start);
+                //ssp.getDistance(n)
+                pQueue.add(ssp.bestPath(n), (n.getTile().coins()/ ssp.getDistance(n)));
+            }
+        }
+        return pQueue;
+    }
+
+    public void maxScramGreedy(ScramState s){
+        Set<Node> nodeSet = new HashSet<>(s.allNodes());
+        Maze graph = new Maze(nodeSet);
+        Node exit = s.exit();
+        while(true){
+            List<Edge> bestPathToCoin = pathToCoin(s).extractMin();
+            for(Edge e: bestPathToCoin){
+                ShortestPaths<Node, Edge> sspCurr = new ShortestPaths<>(graph);
+                sspCurr.singleSourceDistances(e.source());
+                List<Edge> bestPathToExit = sspCurr.bestPath(exit);
+                if ((double) s.stepsToGo() <= sspCurr.getDistance(exit) + e.length()*2){
+                    for (Edge edge : bestPathToExit) {
+                        s.moveTo(edge.destination());
+                    }
+                    return;
+                }
+                s.moveTo(e.destination());
+            }
+        }
+    }
+
 
 
 }
