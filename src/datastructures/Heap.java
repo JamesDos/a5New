@@ -288,12 +288,9 @@ public class Heap<T> implements PQueue<T> {
         // Bubbles current node up or down if needed due to priority change
         // If change in priority doesn't violate heap invariant, bubbleUp and bubbleDown
         // will do nothing
-        System.out.println(toStringPriorities());
-        System.out.println(toStringValues());
         bubbleUp(currIndex);
         bubbleDown(currIndex);
-        System.out.println(toStringPriorities());
-        System.out.println(toStringValues());
+
     }
 
     /**

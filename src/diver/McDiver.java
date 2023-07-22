@@ -82,8 +82,8 @@ public class McDiver implements SewerDiver {
         // DO NOT WRITE ALL THE CODE HERE. Instead, write your method elsewhere,
         // with a good specification, and call it from this one.
         //basicScram(state);
-        //maxScramGreedy(state);
-        aPath(state);
+        maxScramGreedy(state);
+        //aPath(state);
     }
     /**
      * Helper method used by scram() that uses dijkstra's to walk McDiver to exit along the
@@ -186,6 +186,14 @@ public class McDiver implements SewerDiver {
         } return bestPaths.extractMin();
     }
 
+    /**
+     * Helper method used by maxScramGreedy() that is an optimized version of basicScram()
+     * Returns a priority queue of a list of edges representing the best paths from McDiver's
+     * current location to any coin in the Maze.
+     * Path priorities are calculated based off of the value of the coin divided by the distance
+     * McDiver would have to travel in order to collect the coin.
+     */
+
     public  PQueue<List<Edge>> pathToCoin(ScramState s){
         Set<Node> nodeSet = new HashSet<>(s.allNodes());
         Maze graph = new Maze(nodeSet);
@@ -202,16 +210,41 @@ public class McDiver implements SewerDiver {
         return pQueue;
     }
 
+    /**
+     * Helper method used by scram() that walks McDiver from the start, around the maze to collect
+     * coins, and finally to the exit.
+     * This method calls pathToCoin() to find the best path from McDiver's current location to the
+     * coin with the highest priority and walks McDiver along that path.
+     * If McDiver is about to run out of steps, McDiver will take the shortest path from his
+     * current location to the exit.
+     */
+
     public void maxScramGreedy(ScramState s){
         Set<Node> nodeSet = new HashSet<>(s.allNodes());
         Maze graph = new Maze(nodeSet);
         Node exit = s.exit();
         while(true){
+            // If maze has no coins, McDiver takes the shortest path to the exit
+            if(pathToCoin(s).size() == 0){
+                ShortestPaths<Node, Edge> sspStart = new ShortestPaths<>(graph);
+                sspStart.singleSourceDistances(s.currentNode());
+                List<Edge> bestPathToExit = sspStart.bestPath(exit);
+                for (Edge edge : bestPathToExit) {
+                    s.moveTo(edge.destination());
+                }
+                return;
+            }
+            // If maze has coins, McDiver goes to the coin with the highest priority in each
+            // iteration. If McDiver is about to run out of steps, McDiver takes the shortest path
+            // from current location to the exit.
             List<Edge> bestPathToCoin = pathToCoin(s).extractMin();
             for(Edge e: bestPathToCoin){
                 ShortestPaths<Node, Edge> sspCurr = new ShortestPaths<>(graph);
                 sspCurr.singleSourceDistances(e.source());
                 List<Edge> bestPathToExit = sspCurr.bestPath(exit);
+                // e.length()*2 guarantees that McDiver will have enough steps to the exit
+                // since McDiver has to double back (go to the tile with the coin and then back
+                // his original tile) if he were to collect the coin and go to the exit
                 if ((double) s.stepsToGo() <= sspCurr.getDistance(exit) + e.length()*2){
                     for (Edge edge : bestPathToExit) {
                         s.moveTo(edge.destination());
