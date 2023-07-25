@@ -9,7 +9,7 @@ import java.util.Random;
 public class Main {
     // TODO: set this flag to true while timing things for your report. Also make sure to run this main
     // without the gui for clean numbers.
-    static boolean reportTime = false;
+    static boolean reportTime = true;
 
     static long seed = new Random().nextLong();
     static boolean useGUI = true;

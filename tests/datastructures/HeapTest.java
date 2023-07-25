@@ -44,9 +44,9 @@ public class HeapTest {
     // coverage, and with both in min and max modes. Some example test cases have been
     // provided for you.
     @ Test void todo1to8Test(){
-        // Test multiple resizes on minHeap and maxHeap
-        PQueue<Integer> minHeap = new Heap<>(true);
-        PQueue<Integer> maxHeap = new Heap<>(false);
+        // Test multiple resizes on minHeap and maxHeap (TODO 1)
+        Heap<Integer> minHeap = new Heap<>(true);
+        Heap<Integer> maxHeap = new Heap<>(false);
         for (int i = 0; i < 21; i++){
             minHeap.add(i, i);
             maxHeap.add(i, i);
@@ -54,6 +54,8 @@ public class HeapTest {
         assertEquals(21, minHeap.size());
         assertEquals(21, maxHeap.size());
 
+
+        //Testing add (TODO 2-4)
         // Tests if priority (order invariant) is kept after adding a pair
         minHeap = new Heap<>(true);
         maxHeap = new Heap<>(false);
@@ -61,28 +63,66 @@ public class HeapTest {
             minHeap.add(i, i);
             maxHeap.add(i, i);
         }
-        // bubble up from leaf to root for minHeap
+        // bubble up from leaf to root for minHeap; add to end of list for maxHeap
+        assertEquals(1, minHeap.peek());
+        assertEquals(23, maxHeap.peek());
         minHeap.add(0, 0);
         maxHeap.add(0, 0);
         assertEquals(0, minHeap.peek());
         assertEquals(23, maxHeap.peek());
-        // bubble up from leaf to root for maxHeap
+        // bubble up from leaf to root for maxHeap; add to end of list for maxHeap
         minHeap.add(25, 25);
         maxHeap.add(25, 25);
         assertEquals(0, minHeap.peek());
         assertEquals(25, maxHeap.peek());
-        // extractMin should return root node and maintain heap order invariant
+
+        // Testing extractMin (TODO 6-7)
+        // extractMin should return root node and maintain heap order invariant for both heaps
         assertEquals(0, minHeap.extractMin());
+        assertEquals(1, minHeap.peek());
         assertEquals(25, maxHeap.extractMin());
+        assertEquals(23, maxHeap.peek());
+
+        // Testing changPriority (TODO 8)
         // changing priority should cause bubbling up/down if needed
+        // Bubbling up due to priority change
         maxHeap.changePriority(11, 50.0);
-        assertEquals(11, maxHeap.extractMin());
+        assertEquals(11, maxHeap.peek());
+        assertEquals(50.0, maxHeap.peekAtPriority());
         minHeap.changePriority(19, 0.0);
-        assertEquals(19, minHeap.extractMin());
+        assertEquals(19, minHeap.peek());
+        assertEquals(19, minHeap.peek());
+        // Bubbling down due to priority change
+        maxHeap.changePriority(11, 11.0);
+        assertEquals(23, maxHeap.peek());
+        assertEquals(23.0, maxHeap.peekAtPriority());
+        minHeap.changePriority(19, 19.0);
+        assertEquals(1, minHeap.peek());
+        assertEquals(1.0, minHeap.peekAtPriority());
+        // No bubbling due to priority change
+        maxHeap.changePriority(21, 22.0);
+        assertEquals(23, maxHeap.peek());
+        minHeap.changePriority(3, 2.0);
+        assertEquals(1, minHeap.peek());
 
-
-
-
-
+        // Changing priority of a node to be the same as priority of another node
+        // Node with lower priority now has priority of parent
+        String beforeMax = maxHeap.toStringValues();
+        String beforeMin = minHeap.toStringValues();
+        maxHeap.changePriority(17, 19.0);
+        assertEquals(beforeMax, maxHeap.toStringValues());
+        minHeap.changePriority(11, 5.0);
+        assertEquals(beforeMin, minHeap.toStringValues());
+        // Node with higher priority now has priority of higher priority child; No bubbling
+        maxHeap.changePriority(13, 7.0);
+        assertEquals(beforeMax, maxHeap.toStringValues());
+        minHeap.changePriority(7, 15.0);
+        assertEquals(beforeMin, minHeap.toStringValues());
+        // Node with higher priority now has priority of lower priority child; Other child should
+        // bubble up
+        maxHeap.changePriority(21, 9.0);
+        assertEquals("[23, 19, 11, 13, 17, 21, 9, 1, 7, 5, 15, 3, 0]", maxHeap.toStringValues());
+        minHeap.changePriority(9, 21.0);
+        assertEquals("[1, 3, 5, 7, 19, 11, 13, 15, 17, 9, 21, 23, 25]", minHeap.toStringValues());
     }
 }

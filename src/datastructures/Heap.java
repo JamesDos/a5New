@@ -267,6 +267,7 @@ public class Heap<T> implements PQueue<T> {
         if(isEmpty()) throw new IllegalArgumentException();
         T output = b[0].value;
         swap(0, map.get(b[size()-1].value));
+        map.remove(b[size()-1].value);
         b[size()-1] = null;
         size -= 1;
         bubbleDown(0);
@@ -290,7 +291,6 @@ public class Heap<T> implements PQueue<T> {
         // will do nothing
         bubbleUp(currIndex);
         bubbleDown(currIndex);
-
     }
 
     /**

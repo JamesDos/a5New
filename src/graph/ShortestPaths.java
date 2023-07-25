@@ -1,5 +1,6 @@
 package graph;
 
+import datastructures.Heap;
 import datastructures.PQueue;
 import datastructures.SlowPQueue;
 import java.util.HashMap;
@@ -48,7 +49,8 @@ public class ShortestPaths<Vertex, Edge> {
      */
     public void singleSourceDistances(Vertex source) {
         // Implementation constraint: use Dijkstra's single-source shortest paths algorithm.
-        PQueue<Vertex> frontier = new SlowPQueue<>();
+        //PQueue<Vertex> frontier = new SlowPQueue<>();
+        Heap<Vertex> frontier = new Heap<>(true);
         distances = new HashMap<>();
         bestEdges = new HashMap<>();
         // TODO: Complete computation of distances and best-path edges
@@ -68,7 +70,9 @@ public class ShortestPaths<Vertex, Edge> {
                     if(dist < distances.get(neighbor)){
                         distances.put(neighbor, dist);
                         bestEdges.put(neighbor, e);
-                        frontier.changePriority(neighbor, dist);
+                        if(frontier.toStringValues().contains(neighbor.toString())) {
+                            frontier.changePriority(neighbor, dist);
+                        }
                     }
                 }
             }
