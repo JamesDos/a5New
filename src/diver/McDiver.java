@@ -57,11 +57,6 @@ public class McDiver implements SewerDiver {
         // Create list of pointers for neighbors
         List<NodeStatus> sortedNode = new ArrayList<>(s.neighbors());
         Collections.sort(sortedNode);
-        //System.out.println("Current: " + current);
-        //System.out.println("Size: " + sortedNode.size());
-        for(NodeStatus n: sortedNode){
-            //System.out.println(n.getId() + " " + n.getDistanceToRing());
-        }
         for (NodeStatus neighbor : sortedNode) {
             if (!visited.contains(neighbor.getId())) {
                 s.moveTo(neighbor.getId());
@@ -81,9 +76,10 @@ public class McDiver implements SewerDiver {
         // TODO: Get out of the sewer system before the steps are used up.
         // DO NOT WRITE ALL THE CODE HERE. Instead, write your method elsewhere,
         // with a good specification, and call it from this one.
-        basicScram(state);
+        //basicScram(state);
         //maxScramGreedy(state);
         //aPath(state);
+        optimalScram(state, new HashSet<>());
     }
     /**
      * Helper method used by scram() that uses dijkstra's to walk McDiver to exit along the
@@ -300,6 +296,39 @@ public class McDiver implements SewerDiver {
                 (exit.getTile().column() - currNode.getTile().column()));
 
         return gCost + hCost;
+    }
+
+    /**
+     * A version of scram optimized to for large mazes with a coin density of 0.99
+     * optimalScram() should run noticeably faster than maxScram on such mazes
+     * optimalScram() walks McDiver randomly around the maze using a dfs
+     * until he is about to run out of steps.
+     * If McDiver is about to run out of steps, he takes the shortest path from his current
+     * location to the exit; this path is calculated each time McDiver takes a step.
+     */
+    public void optimalScram(ScramState s, HashSet<Node> visited){
+        Set<Node> nodeSet = new HashSet<>(s.allNodes());
+        Maze graph = new Maze(nodeSet);
+        Node exit = s.exit();
+        Node curr = s.currentNode();
+        ShortestPaths<Node, Edge> ssp = new ShortestPaths<>(graph);
+        ssp.singleSourceDistances(curr);
+        List<Edge> pathToExit = ssp.bestPath(exit);
+        visited.add(curr);
+        for(Node neighbor: curr.getNeighbors()){
+            if(s.stepsToGo() <= ssp.getDistance(exit) + curr.getEdge(neighbor).length()*2){
+                for(Edge e: pathToExit){
+                    s.moveTo(e.destination());
+                }
+                return;
+            }
+            if(!visited.contains(neighbor)){
+                s.moveTo(neighbor);
+                optimalScram(s, visited);
+                if(s.currentNode().equals(exit)) return;
+                s.moveTo(curr);
+            }
+        }
     }
 
 
