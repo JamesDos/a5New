@@ -39,12 +39,12 @@ public class GameState implements SeekState, ScramState {
     /**
      * minimum and maximum number of rows
      */
-    public static final int MIN_ROWS = 8, MAX_ROWS = 25;
+    public static final int MIN_ROWS = 800, MAX_ROWS = 800;
 
     /**
      * minimum and maximum number of columns
      */
-    public static final int MIN_COLS = 12, MAX_COLS = 40;
+    public static final int MIN_COLS = 800, MAX_COLS = 800;
 
     /**
      * Minimum and maximum bonuses

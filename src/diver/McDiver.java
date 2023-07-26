@@ -81,8 +81,8 @@ public class McDiver implements SewerDiver {
         // TODO: Get out of the sewer system before the steps are used up.
         // DO NOT WRITE ALL THE CODE HERE. Instead, write your method elsewhere,
         // with a good specification, and call it from this one.
-        //basicScram(state);
-        maxScramGreedy(state);
+        basicScram(state);
+        //maxScramGreedy(state);
         //aPath(state);
     }
     /**
@@ -198,7 +198,8 @@ public class McDiver implements SewerDiver {
         Set<Node> nodeSet = new HashSet<>(s.allNodes());
         Maze graph = new Maze(nodeSet);
         Node start = s.currentNode();
-        PQueue<List<Edge>> pQueue = new Heap<>(false);
+        //Heap<List<Edge>> pQueue = new Heap<>(false);
+        PQueue<List<Edge>> pQueue = new SlowPQueue<>();
         for(Node n: s.allNodes()){
             if(n.getTile().coins() > 0){
                 ShortestPaths<Node, Edge> ssp = new ShortestPaths<>(graph);
