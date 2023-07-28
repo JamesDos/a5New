@@ -27,8 +27,8 @@ import java.util.stream.Stream;
 public class Sewers {
 
     public static final int MAX_EDGE_WEIGHT = 15;
-    private static final double DENSITY = 0.99;
-    private static final double COIN_PROBABILITY = 0.33;
+    private static final double DENSITY = 0.60;
+    private static final double COIN_PROBABILITY = 0.99;
     public static final int MAX_COIN_VALUE = 1000;
     public static final int TASTY_VALUE = 5000;
 

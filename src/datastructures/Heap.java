@@ -3,23 +3,22 @@ package datastructures;
 import java.util.*;
 
 /**
- * An implementation of a binary heap. An instance is a max-heap or a
- * min-heap of distinct values of type T with priorities of type double.
+ * An implementation of a binary heap. An instance is a max-heap or a min-heap of distinct values of
+ * type T with priorities of type double.
  */
 public class Heap<T> implements PQueue<T> {
+
     /**
-     * Class Invariant:<p>
-     * 1. b[0..size-1] represents a complete binary
-     * tree. b[0] is the root; For k > 0, (k-1)/2 (using int division)
-     * is the index in b of the parent of b[k] For k >= 0, 2k+1 and 2k+2
-     * are the indexes in b of left and right children of b[k].
+     * Class Invariant:<p> 1. b[0..size-1] represents a complete binary tree. b[0] is the root; For
+     * k > 0, (k-1)/2 (using int division) is the index in b of the parent of b[k] For k >= 0, 2k+1
+     * and 2k+2 are the indexes in b of left and right children of b[k].
      * <p>
      * 2. For k in 0..size-1, b[k] contains the value and its priority.
      * <p>
      * 3. The values in b[0..size-1] are all different.
      * <p>
-     * 4. For k in 1..size-1,  .. if isMinHeap, (b[k]'s priority) >= (b[k]'s parent's
-     * priority), .. if !isMinHeap, (b[k]'s priority) <= (b[k]'s parent's priority).
+     * 4. For k in 1..size-1,  .. if isMinHeap, (b[k]'s priority) >= (b[k]'s parent's priority), ..
+     * if !isMinHeap, (b[k]'s priority) <= (b[k]'s parent's priority).
      * <p>
      * map and the tree are in sync, meaning:
      * <p>
@@ -33,8 +32,8 @@ public class Heap<T> implements PQueue<T> {
     protected HashMap<T, Integer> map;
 
     /**
-     * Constructor: an empty heap with capacity 10.  It is a min-heap if
-     * isMin is true and a max-heap if isMin is false.
+     * Constructor: an empty heap with capacity 10.  It is a min-heap if isMin is true and a
+     * max-heap if isMin is false.
      */
     @SuppressWarnings("unchecked")
     public Heap(boolean isMin) {
@@ -45,8 +44,8 @@ public class Heap<T> implements PQueue<T> {
     }
 
     /**
-     * If size = length of b, double the length of array b.  The
-     * worst-case time is proportional to the length of b.
+     * If size = length of b, double the length of array b.  The worst-case time is proportional to
+     * the length of b.
      */
     protected void ensureSpace() {
         // TODO #1. We ask you to write this method because it shows you
@@ -60,16 +59,15 @@ public class Heap<T> implements PQueue<T> {
 
         // The body is most easily written using a method in Collections Framework
         // class Arrays. Look for methods that copy arrays and choose a suitable one.
-        if(size == b.length){
-            b = Arrays.copyOf(b, size()*2);
+        if (size == b.length) {
+            b = Arrays.copyOf(b, size() * 2);
         }
     }
 
     /**
-     * Insert v with priority p to the heap.  Throw an
-     * IllegalArgumentException if v is already in the heap. The
-     * expected time is logarithmic and the worst-case time is linear in
-     * the size of the heap.
+     * Insert v with priority p to the heap.  Throw an IllegalArgumentException if v is already in
+     * the heap. The expected time is logarithmic and the worst-case time is linear in the size of
+     * the heap.
      */
     public void add(T v, double p) throws IllegalArgumentException {
         // TODO #2: Write this whole method. Note that bubbleUp is not implemented,
@@ -80,14 +78,14 @@ public class Heap<T> implements PQueue<T> {
         // Do NOT call bubbleUp until the class invariant is true
         // (except for the need to bubble up).
         // Calling bubbleUp is the last thing to be done.
-        if(map.containsKey(v)){
+        if (map.containsKey(v)) {
             throw new IllegalArgumentException();
         }
         ensureSpace();
         // add element to leaf
-        size ++;
-        b[size()-1] = new Pair(v, p);
-        map.put(v, size()-1);
+        size++;
+        b[size() - 1] = new Pair(v, p);
+        map.put(v, size() - 1);
         bubbleUp(map.get(v));
     }
 
@@ -98,11 +96,12 @@ public class Heap<T> implements PQueue<T> {
         return size;
     }
 
-    public boolean isEmpty() { return size == 0; }
+    public boolean isEmpty() {
+        return size == 0;
+    }
 
     /**
-     * Swap b[h] and b[k].
-     * Requires: 0 <= h < heap-size, 0 <= k < heap-size.
+     * Swap b[h] and b[k]. Requires: 0 <= h < heap-size, 0 <= k < heap-size.
      */
     void swap(int h, int k) {
         assert 0 <= h && h < size && 0 <= k && k < size;
@@ -125,36 +124,33 @@ public class Heap<T> implements PQueue<T> {
     }
 
     /**
-     * If a value with priority p1 belongs above a value with priority
-     * p2 in the heap, return 1. If priority p1 and priority p2 are the
-     * same, return 0.  If a value with priority p1 should be below a
-     * value with priority p2 in the heap, return -1. This is based on
-     * what kind of a heap this is; e.g., in a min-heap, the value with
-     * the smallest priority is in the root. In a max-heap, the
-     * value with the largest priority is in the root.
+     * If a value with priority p1 belongs above a value with priority p2 in the heap, return 1. If
+     * priority p1 and priority p2 are the same, return 0.  If a value with priority p1 should be
+     * below a value with priority p2 in the heap, return -1. This is based on what kind of a heap
+     * this is; e.g., in a min-heap, the value with the smallest priority is in the root. In a
+     * max-heap, the value with the largest priority is in the root.
      */
     public int compareTo(double p1, double p2) {
-        if (p1 == p2) return 0;
+        if (p1 == p2) {
+            return 0;
+        }
         return (isMinHeap == (p1 < p2)) ? 1 : -1;
     }
 
     /**
-     * If b[h] should be above b[k] in the heap, return 1.  If b[h]'s
-     * priority and b[k]'s priority are the same, return 0.  If b[h]
-     * should be below b[k] in the heap, return -1.  This is based on
-     * what kind of a heap this is, ... E.g. a min-heap, the value with
-     * the smallest priority is in the root. ... E.g. a max-heap, the
-     * value with the largest priority is in the root.
+     * If b[h] should be above b[k] in the heap, return 1.  If b[h]'s priority and b[k]'s priority
+     * are the same, return 0.  If b[h] should be below b[k] in the heap, return -1.  This is based
+     * on what kind of a heap this is, ... E.g. a min-heap, the value with the smallest priority is
+     * in the root. ... E.g. a max-heap, the value with the largest priority is in the root.
      */
     public int compareTo(int h, int k) {
         return compareTo(b[h].priority, b[k].priority);
     }
 
     /**
-     * If h >= size, return. Otherwise, bubble b[h] up the heap to its
-     * right place.  Precondition: 0 <= h and, if h < size, the class
-     * invariant is true, except perhaps that b[h] belongs above its
-     * parent (if h > 0) in the heap.
+     * If h >= size, return. Otherwise, bubble b[h] up the heap to its right place.  Precondition: 0
+     * <= h and, if h < size, the class invariant is true, except perhaps that b[h] belongs above
+     * its parent (if h > 0) in the heap.
      */
     void bubbleUp(int h) {
         // TODO #4 This method should be called within insert in order
@@ -165,36 +161,37 @@ public class Heap<T> implements PQueue<T> {
         // Use the compareTo methods to test whether value h is in its right place.
         // That way, YOU don't have to worry about whether it is a min- or max-heap!
         assert h >= 0;
-        if(h>=size) return;
+        if (h >= size) {
+            return;
+        }
         boolean isDone = false;
         while (!isDone) {
-            int indexOfParent = (h-1)/2;
-            if(compareTo(h, indexOfParent) > 0){
+            int indexOfParent = (h - 1) / 2;
+            if (compareTo(h, indexOfParent) > 0) {
                 swap(h, indexOfParent);
                 h = indexOfParent;
-            } else{
+            } else {
                 isDone = true;
             }
         }
     }
 
     /**
-     * If this is a min-heap, return the heap value with lowest
-     * priority. If this is a max-heap, return the heap value with
-     * highest priority. Do not change the heap. This operation takes
-     * constant time.  Throw a NoSuchElementException if the heap is
-     * empty.
+     * If this is a min-heap, return the heap value with lowest priority. If this is a max-heap,
+     * return the heap value with highest priority. Do not change the heap. This operation takes
+     * constant time.  Throw a NoSuchElementException if the heap is empty.
      */
     public T peek() {
         // TODO 5: Do peek. This is an easy one.
-        if(isEmpty()) throw new IllegalArgumentException();
+        if (isEmpty()) {
+            throw new IllegalArgumentException();
+        }
         return b[0].value;
     }
 
     /**
-     * If this is a min-heap, return the lowest priority.  If this
-     * is a max-heap, return the highest priority. Do not change
-     * the heap.  This operation takes constant time.  Throw a
+     * If this is a min-heap, return the lowest priority.  If this is a max-heap, return the highest
+     * priority. Do not change the heap.  This operation takes constant time.  Throw a
      * NoSuchElementException if the heap is empty.
      */
     public double peekAtPriority() {
@@ -205,36 +202,38 @@ public class Heap<T> implements PQueue<T> {
     }
 
     /**
-     * If h < 0 or size <= h, return. Otherwise, Bubble b[h] down in
-     * heap until the class invariant is true.  If there is a choice to
-     * bubble down to both the left and right children (because their
-     * priorities are equal), choose the left child.
-     *
-     * Requires: If 0 <= h < size, the class invariant is true except
-     * that perhaps b[h] belongs below one or both of its children.
+     * If h < 0 or size <= h, return. Otherwise, Bubble b[h] down in heap until the class invariant
+     * is true.  If there is a choice to bubble down to both the left and right children (because
+     * their priorities are equal), choose the left child.
+     * <p>
+     * Requires: If 0 <= h < size, the class invariant is true except that perhaps b[h] belongs
+     * below one or both of its children.
      */
     void bubbleDown(int h) {
         // TODO 6: DO NOT USE RECURSION. Use iteration.
-        if (h < 0 || size <= h) return;
+        if (h < 0 || size <= h) {
+            return;
+        }
         boolean isDone = false;
-        while(!isDone){
-            int LChild = 2*h + 1;
-            int RChild = 2*h + 2;
+        while (!isDone) {
+            int LChild = 2 * h + 1;
+            int RChild = 2 * h + 2;
             // Prevents index out of bounds error when calling compareTo()
-            if(LChild >= size()) return;
+            if (LChild >= size()) {
+                return;
+            }
             // Handles case where LChild is the end of the list
-            if(RChild >= size()){
+            if (RChild >= size()) {
                 swap(h, LChild);
                 return;
             }
             // Compares the priority of both children and chooses the higher priority child
             // if priority of LChild == RChild, higherPrio would be LChild
-            int higherPrio = (compareTo(LChild, RChild) > -1)? LChild: RChild;
-            if(compareTo(h, higherPrio) < 0) {
+            int higherPrio = (compareTo(LChild, RChild) > -1) ? LChild : RChild;
+            if (compareTo(h, higherPrio) < 0) {
                 swap(h, higherPrio);
                 h = higherPrio;
-            }
-            else{
+            } else {
                 isDone = true;
             }
         }
@@ -254,36 +253,35 @@ public class Heap<T> implements PQueue<T> {
     }
 
     /**
-     * If this is a min-heap, remove and return heap value with
-     * lowest priority.  If this is a max-heap, remove and
-     * return heap value with highest priority.
-     * Throw a NoSuchElementException if the heap is empty.
-     * Expected time: logarithmic.
-     * Worst-case time: linear in the size of the
+     * If this is a min-heap, remove and return heap value with lowest priority.  If this is a
+     * max-heap, remove and return heap value with highest priority. Throw a NoSuchElementException
+     * if the heap is empty. Expected time: logarithmic. Worst-case time: linear in the size of the
      * heap.
      */
     public T extractMin() {
         // TODO 7:
-        if(isEmpty()) throw new IllegalArgumentException();
+        if (isEmpty()) {
+            throw new IllegalArgumentException();
+        }
         T output = b[0].value;
-        swap(0, map.get(b[size()-1].value));
-        map.remove(b[size()-1].value);
-        b[size()-1] = null;
+        swap(0, map.get(b[size() - 1].value));
+        map.remove(b[size() - 1].value);
+        b[size() - 1] = null;
         size -= 1;
         bubbleDown(0);
         return output;
     }
 
     /**
-     * Change the priority of value v to p.
-     * Throw an IllegalArgumentException if v is not in the heap.
-     * Expected time: logarithmic.
-     * Worst-case time: linear in the size of the heap.
+     * Change the priority of value v to p. Throw an IllegalArgumentException if v is not in the
+     * heap. Expected time: logarithmic. Worst-case time: linear in the size of the heap.
      */
     public void changePriority(T v, double p) {
         // TODO 8: When this method is correct, all testing procedures
         // will find no errors.
-        if(!map.containsKey(v)) throw new IllegalArgumentException();
+        if (!map.containsKey(v)) {
+            throw new IllegalArgumentException();
+        }
         int currIndex = map.get(v);
         b[currIndex].priority = p;
         // Bubbles current node up or down if needed due to priority change
@@ -294,8 +292,7 @@ public class Heap<T> implements PQueue<T> {
     }
 
     /**
-     * Return the heap values (only, not the priorities) in a syntax like
-     * [5, 3, 2].
+     * Return the heap values (only, not the priorities) in a syntax like [5, 3, 2].
      */
     public String toStringValues() {
         StringBuilder resb = new StringBuilder("[");

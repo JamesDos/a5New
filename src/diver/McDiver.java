@@ -21,11 +21,14 @@ import java.util.Map;
 import java.util.HashMap;
 
 
-/** This is the place for your implementation of the {@code SewerDiver}.
+/**
+ * This is the place for your implementation of the {@code SewerDiver}.
  */
 public class McDiver implements SewerDiver {
 
-    /** See {@code SewerDriver} for specification. */
+    /**
+     * See {@code SewerDriver} for specification.
+     */
     @Override
     public void seek(SeekState state) {
         // TODO : Look for the ring and return.
@@ -44,13 +47,12 @@ public class McDiver implements SewerDiver {
 
     /**
      * Helper method used by seek() that uses a dfs to walk McDiver to the ring (if possible)
-     * McDiver is standing on node 'current' given by state 's'
-     * Method ends with McDiver standing on node current; Ends on ring if current == ring
-     * Requires current is unvisited
+     * McDiver is standing on node 'current' given by state 's' Method ends with McDiver standing on
+     * node current; Ends on ring if current == ring Requires current is unvisited
      */
 
-    public static void dfsWalk(SeekState s, HashSet<Long> visited){
-        if(s.distanceToRing() == 0){
+    private static void dfsWalk(SeekState s, HashSet<Long> visited) {
+        if (s.distanceToRing() == 0) {
             return;
         }
         long current = s.currentLocation();
@@ -63,7 +65,7 @@ public class McDiver implements SewerDiver {
                 s.moveTo(neighbor.getId());
                 // s is now the seek state of neighbor
                 dfsWalk(s, visited);
-                if(s.distanceToRing() == 0){
+                if (s.distanceToRing() == 0) {
                     return;
                 }
                 s.moveTo(current);
@@ -71,25 +73,28 @@ public class McDiver implements SewerDiver {
         }
     }
 
-    /** See {@code SewerDriver} for specification. */
+    /**
+     * See {@code SewerDriver} for specification.
+     */
     @Override
     public void scram(ScramState state) {
         // TODO: Get out of the sewer system before the steps are used up.
         // DO NOT WRITE ALL THE CODE HERE. Instead, write your method elsewhere,
         // with a good specification, and call it from this one.
         //vanillaScram(state);
-        //maxScram(state);
+        maxScram(state);
         //aPath(state);
-        optimizedScram(state);
+        //optimizedScram(state);
         //optimizedScram2(state, new HashSet<>());
 
     }
+
     /**
-     * Helper method used by scram() that uses dijkstra's to walk McDiver to exit along the
-     * shortest possible path.
-     * Most basic version of scram; does not take into consideration coin's values or distances
+     * Helper method used by scram() that uses dijkstra's to walk McDiver to exit along the shortest
+     * possible path. Most basic version of scram; does not take into consideration coin's values or
+     * distances
      */
-    public void vanillaScram(ScramState s){
+    private void vanillaScram(ScramState s) {
         Set<Node> nodeSet = new HashSet<>(s.allNodes());
         Maze graph = new Maze(nodeSet);
         ShortestPaths<Node, Edge> ssp = new ShortestPaths<>(graph);
@@ -97,20 +102,19 @@ public class McDiver implements SewerDiver {
         Node exit = s.exit();
         ssp.singleSourceDistances(start);
         List<Edge> bestPath = ssp.bestPath(exit);
-        for(Edge e: bestPath){
+        for (Edge e : bestPath) {
             s.moveTo(e.destination());
         }
     }
 
     /**
-     * Helper method used by maxScramGreedy() that is an optimized version of basicScram()
-     * Returns a priority queue of a list of edges representing the best paths from McDiver's
-     * current location to any coin in the Maze.
-     * Path priorities are calculated based off of the value of the coin divided by the distance
-     * McDiver would have to travel in order to collect the coin.
+     * Helper method used by maxScramGreedy() that is an optimized version of basicScram() Returns a
+     * priority queue of a list of edges representing the best paths from McDiver's current location
+     * to any coin in the Maze. Path priorities are calculated based off of the value of the coin
+     * divided by the distance McDiver would have to travel in order to collect the coin.
      */
 
-    public  PQueue<List<Edge>> pathToCoin(ScramState s){
+    private PQueue<List<Edge>> pathToCoin(ScramState s) {
         Set<Node> nodeSet = new HashSet<>(s.allNodes());
         Maze graph = new Maze(nodeSet);
         Node start = s.currentNode();
@@ -118,10 +122,10 @@ public class McDiver implements SewerDiver {
         //PQueue<List<Edge>> pQueue = new SlowPQueue<>();
         ShortestPaths<Node, Edge> ssp = new ShortestPaths<>(graph);
         ssp.singleSourceDistances(start);
-        for(Node n: s.allNodes()){
-            if(n.getTile().coins() > 0){
+        for (Node n : s.allNodes()) {
+            if (n.getTile().coins() > 0) {
                 //ssp.getDistance(n)
-                pQueue.add(ssp.bestPath(n), (n.getTile().coins()/ ssp.getDistance(n)));
+                pQueue.add(ssp.bestPath(n), (n.getTile().coins() / ssp.getDistance(n)));
             }
         }
         return pQueue;
@@ -129,20 +133,19 @@ public class McDiver implements SewerDiver {
 
     /**
      * Helper method used by scram() that walks McDiver from the start, around the maze to collect
-     * coins, and finally to the exit.
-     * This method calls pathToCoin() to find the best path from McDiver's current location to the
-     * coin with the highest priority and walks McDiver along that path.
-     * If McDiver is about to run out of steps, McDiver will take the shortest path from his
+     * coins, and finally to the exit. This method calls pathToCoin() to find the best path from
+     * McDiver's current location to the coin with the highest priority and walks McDiver along that
+     * path. If McDiver is about to run out of steps, McDiver will take the shortest path from his
      * current location to the exit.
      */
 
-    public void maxScram(ScramState s){
+    private void maxScram(ScramState s) {
         Set<Node> nodeSet = new HashSet<>(s.allNodes());
         Maze graph = new Maze(nodeSet);
         Node exit = s.exit();
-        while(true){
+        while (true) {
             // If maze has no coins, McDiver takes the shortest path to the exit
-            if(pathToCoin(s).size() == 0){
+            if (pathToCoin(s).size() == 0) {
                 ShortestPaths<Node, Edge> sspStart = new ShortestPaths<>(graph);
                 sspStart.singleSourceDistances(s.currentNode());
                 List<Edge> bestPathToExit = sspStart.bestPath(exit);
@@ -155,14 +158,14 @@ public class McDiver implements SewerDiver {
             // iteration. If McDiver is about to run out of steps, McDiver takes the shortest path
             // from current location to the exit.
             List<Edge> bestPathToCoin = pathToCoin(s).extractMin();
-            for(Edge e: bestPathToCoin){
+            for (Edge e : bestPathToCoin) {
                 ShortestPaths<Node, Edge> sspCurr = new ShortestPaths<>(graph);
                 sspCurr.singleSourceDistances(e.source());
                 List<Edge> bestPathToExit = sspCurr.bestPath(exit);
                 // e.length()*2 guarantees that McDiver will have enough steps to the exit
                 // since McDiver has to double back (go to the tile with the coin and then back
                 // his original tile) if he were to collect the coin and go to the exit
-                if ((double) s.stepsToGo() <= sspCurr.getDistance(exit) + e.length()*2){
+                if ((double) s.stepsToGo() <= sspCurr.getDistance(exit) + e.length() * 2) {
                     for (Edge edge : bestPathToExit) {
                         s.moveTo(edge.destination());
                     }
@@ -172,42 +175,44 @@ public class McDiver implements SewerDiver {
             }
         }
     }
-    public static void aPath(ScramState s){
+
+    private static void aPath(ScramState s) {
         // Initialize a map for 0(1) lookup of cost of each node
         Map<Node, Integer> aMap = new HashMap<>();
 
         // Initialize each node as key and its cost as the value
-        for(Node node: s.allNodes()){
-            aMap.put(node, nodeCost(s.currentNode(),s.exit(),node));
+        for (Node node : s.allNodes()) {
+            aMap.put(node, nodeCost(s.currentNode(), s.exit(), node));
         }
 
         Stack<Node> discovered = new Stack<>();
 
         boolean isDone = false;
-        while(!isDone){
+        while (!isDone) {
             Node moveNode = s.currentNode();
             discovered.push(moveNode);
             int min = 0;
             // Look through list of available neighbors and compare their cost
             // picks the node with the lowest cost and not in discovered list
-            for(Node node: s.currentNode().getNeighbors()){
-                if(min == 0){
+            for (Node node : s.currentNode().getNeighbors()) {
+                if (min == 0) {
                     min = aMap.get(node);
-                    moveNode = node;}
-                if(aMap.get(node) < min && (!node.equals((discovered.peek())))){
+                    moveNode = node;
+                }
+                if (aMap.get(node) < min && (!node.equals((discovered.peek())))) {
                     System.out.println(discovered);
                     moveNode = node;
                     System.out.println(moveNode);
                 }
             }
             s.moveTo(moveNode);
-            if(s.currentNode().getTile().type() == Tile.TileType.RING){
+            if (s.currentNode().getTile().type() == Tile.TileType.RING) {
                 isDone = true;
             }
         }
     }
 
-    public static Integer nodeCost(Node start, Node exit, Node currNode){
+    private static Integer nodeCost(Node start, Node exit, Node currNode) {
         // Find manhattan distance from start to node
         int gCost = Math.abs((start.getTile().row() - currNode.getTile().row()) +
                 (start.getTile().column() - currNode.getTile().column()));
@@ -220,14 +225,13 @@ public class McDiver implements SewerDiver {
 
     /**
      * A version of scram optimized to for large mazes (100x100) with a coin density of 0.99
-     * optimizedScram() should run noticeably faster than maxScram() on such mazes while
-     * scoring more than vanillaScram()
-     * optimizedScram() walks McDiver randomly around the maze using an iterative dfs (implemented
-     * using a stack) until he is about to run out of steps.
-     * If McDiver is about to run out of steps, he takes the shortest path from his current
-     * location to the exit; this path is calculated each time McDiver takes a step.
+     * optimizedScram() should run noticeably faster than maxScram() on such mazes while scoring
+     * more than vanillaScram() optimizedScram() walks McDiver randomly around the maze using an
+     * iterative dfs (implemented using a stack) until he is about to run out of steps. If McDiver
+     * is about to run out of steps, he takes the shortest path from his current location to the
+     * exit; this path is calculated each time McDiver takes a step.
      */
-    public void optimizedScram(ScramState s){
+    private void optimizedScram(ScramState s) {
         Set<Node> nodeSet = new HashSet<>(s.allNodes());
         Maze graph = new Maze(nodeSet);
         Node start = s.currentNode();
@@ -236,20 +240,20 @@ public class McDiver implements SewerDiver {
         Stack<Node> stk = new Stack<>();
         stk.push(start);
         visited.add(start);
-        while(!stk.isEmpty()){
+        while (!stk.isEmpty()) {
             ShortestPaths<Node, Edge> ssp = new ShortestPaths<>(graph);
             ssp.singleSourceDistances(s.currentNode());
             List<Edge> pathToExit = ssp.bestPath(exit);
             Node curr = stk.peek();
             boolean found = false;
-            for(Node neighbor: curr.getNeighbors()){
-                if(s.stepsToGo() <= ssp.getDistance(exit) + curr.getEdge(neighbor).length()*2){
-                    for(Edge e: pathToExit){
+            for (Node neighbor : curr.getNeighbors()) {
+                if (s.stepsToGo() <= ssp.getDistance(exit) + curr.getEdge(neighbor).length() * 2) {
+                    for (Edge e : pathToExit) {
                         s.moveTo(e.destination());
                     }
                     return;
                 }
-                if(!visited.contains(neighbor)){
+                if (!visited.contains(neighbor)) {
                     stk.push(neighbor);
                     visited.add(neighbor);
                     found = true;
@@ -257,7 +261,7 @@ public class McDiver implements SewerDiver {
                     break;
                 }
             }
-            if(!found){
+            if (!found) {
                 stk.pop();
                 s.moveTo(stk.peek());
             }
@@ -265,13 +269,13 @@ public class McDiver implements SewerDiver {
     }
 
     /**
-     * A second version of optimizedScram() that has the same behavior as optimizedScram() but
-     * uses a recursive dfs to walk McDiver around the maze rather than an iterative dfs
-     * NOTE, optimizedScram() was used to report final times in the handout since optimizedScram2()
-     * threw a stack overflow error for larger mazes.
+     * A second version of optimizedScram() that has the same behavior as optimizedScram() but uses
+     * a recursive dfs to walk McDiver around the maze rather than an iterative dfs NOTE,
+     * optimizedScram() was used to report final times in the handout since optimizedScram2() threw
+     * a stack overflow error for larger mazes.
      */
 
-    public void optimizedScram2(ScramState s, HashSet<Node> visited){
+    private void optimizedScram2(ScramState s, HashSet<Node> visited) {
         Set<Node> nodeSet = new HashSet<>(s.allNodes());
         Maze graph = new Maze(nodeSet);
         Node exit = s.exit();
@@ -280,17 +284,19 @@ public class McDiver implements SewerDiver {
         ssp.singleSourceDistances(curr);
         List<Edge> pathToExit = ssp.bestPath(exit);
         visited.add(curr);
-        for(Node neighbor: curr.getNeighbors()){
-            if(s.stepsToGo() <= ssp.getDistance(exit) + curr.getEdge(neighbor).length()*2){
-                for(Edge e: pathToExit){
+        for (Node neighbor : curr.getNeighbors()) {
+            if (s.stepsToGo() <= ssp.getDistance(exit) + curr.getEdge(neighbor).length() * 2) {
+                for (Edge e : pathToExit) {
                     s.moveTo(e.destination());
                 }
                 return;
             }
-            if(!visited.contains(neighbor)){
+            if (!visited.contains(neighbor)) {
                 s.moveTo(neighbor);
                 optimizedScram2(s, visited);
-                if(s.currentNode().equals(exit)) return;
+                if (s.currentNode().equals(exit)) {
+                    return;
+                }
                 s.moveTo(curr);
             }
         }

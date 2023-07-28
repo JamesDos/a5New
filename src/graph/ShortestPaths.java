@@ -59,27 +59,27 @@ public class ShortestPaths<Vertex, Edge> {
         frontier.add(source, 0.0);
         Map<Vertex, Boolean> checker = new HashMap<>();
         checker.put(source, true);
-        while(!frontier.isEmpty()){
+        while (!frontier.isEmpty()) {
             Vertex v = frontier.extractMin();
             checker.put(v, false);
-            for(Edge e: graph.outgoingEdges(v)){
+            for (Edge e : graph.outgoingEdges(v)) {
                 Vertex neighbor = graph.dest(e);
                 double dist = distances.get(v) + graph.weight(e);
-                if(!distances.containsKey(neighbor)){
+                if (!distances.containsKey(neighbor)) {
                     distances.put(neighbor, dist);
                     bestEdges.put(neighbor, e);
                     frontier.add(neighbor, dist);
                     checker.put(neighbor, true);
-                } else{
-                    if(dist < distances.get(neighbor)){
+                } else {
+                    if (dist < distances.get(neighbor)) {
                         distances.put(neighbor, dist);
                         bestEdges.put(neighbor, e);
                         // Uncomment if statement if you want to use heap
-                        if(checker.get(neighbor)) {
+                        if (checker.get(neighbor)) {
                             frontier.changePriority(neighbor, dist);
                         }
                         //if(frontier.toStringValues().contains(neighbor.toString())){
-                            //frontier.changePriority(neighbor, dist);
+                        //frontier.changePriority(neighbor, dist);
                         //}
                     }
                 }
