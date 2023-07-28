@@ -76,16 +76,19 @@ public class McDiver implements SewerDiver {
         // TODO: Get out of the sewer system before the steps are used up.
         // DO NOT WRITE ALL THE CODE HERE. Instead, write your method elsewhere,
         // with a good specification, and call it from this one.
-        //basicScram(state);
-        //maxScramGreedy(state);
+        //vanillaScram(state);
+        //maxScram(state);
         //aPath(state);
-        optimalScram(state, new HashSet<>());
+        //optimalScram(state, new HashSet<>());
+        optimalScram2(state);
+
     }
     /**
      * Helper method used by scram() that uses dijkstra's to walk McDiver to exit along the
      * shortest possible path.
+     * Most basic version of scram; does not take into consideration coin's values or distances
      */
-    public void basicScram(ScramState s){
+    public void vanillaScram(ScramState s){
         Set<Node> nodeSet = new HashSet<>(s.allNodes());
         Maze graph = new Maze(nodeSet);
         ShortestPaths<Node, Edge> ssp = new ShortestPaths<>(graph);
@@ -96,90 +99,6 @@ public class McDiver implements SewerDiver {
         for(Edge e: bestPath){
             s.moveTo(e.destination());
         }
-    }
-
-    public void maxScram(ScramState s){
-        // Uses bfs to search all possible paths from starting node any node in graph
-        Set<Node> nodeSet = new HashSet<>(s.allNodes());
-        Maze graph = new Maze(nodeSet);
-        Node exit = s.exit();
-        /**
-        Set<Node> nodeSet = new HashSet<>(s.allNodes());
-        Maze graph = new Maze(nodeSet);
-        Node start = s.currentNode();
-        Node exit = s.exit();
-        Queue<Node> frontier = new LinkedList<>();
-        Map<Node, List<Edge>> visited = new HashMap<>();
-        Heap<List<Edge>> bestPaths = new Heap<>(false);
-        frontier.add(start);
-        visited.put(frontier.peek(), new ArrayList<>());
-        while(!frontier.isEmpty()){
-            Node curr = frontier.poll();
-            int currVal = curr.getTile().coins();
-            List<Edge> currPath = visited.get(curr);
-            for(Node neighbor: curr.getNeighbors()){
-                List<Edge> neighPath = new ArrayList<>(currPath);
-                int nVal = currVal + neighbor.getTile().coins();
-                neighPath.add(curr.getEdge(neighbor));
-                if(!visited.containsKey(neighbor)){
-                    visited.put(neighbor, neighPath);
-                    frontier.add(neighbor);
-                    bestPaths.add(neighPath, nVal);
-                } else{
-                    if(nVal > bestPaths.peekAtPriority() ){
-                        bestPaths.changePriority(neighPath, nVal);
-                    }
-                }
-            }
-        }
-
-        List<Edge> greatest = bestPaths.extractMin();
-        System.out.println("size" + greatest.size());
-        */
-        while(true) {
-            List<Edge> greatest = findBestPath(s);
-            for (Edge e : greatest) {
-                ShortestPaths<Node, Edge> ssp = new ShortestPaths<>(graph);
-                ssp.singleSourceDistances(e.source());
-                if ((double) s.stepsToGo() == ssp.getDistance(exit)) {
-                    System.out.println("in if");
-                    List<Edge> bestPath = ssp.bestPath(exit);
-                    for (Edge edge : bestPath) {
-                        s.moveTo(edge.destination());
-                    }
-                    return;
-                }
-                s.moveTo(e.destination());
-            }
-        }
-    }
-
-    public List<Edge> findBestPath(ScramState s){
-        Node start = s.currentNode();
-        Queue<Node> frontier = new LinkedList<>();
-        Map<Node, List<Edge>> visited = new HashMap<>();
-        Heap<List<Edge>> bestPaths = new Heap<>(false);
-        frontier.add(start);
-        visited.put(frontier.peek(), new ArrayList<>());
-        while(!frontier.isEmpty()){
-            Node curr = frontier.poll();
-            int currVal = curr.getTile().coins();
-            List<Edge> currPath = visited.get(curr);
-            for(Node neighbor: curr.getNeighbors()){
-                List<Edge> neighPath = new ArrayList<>(currPath);
-                int nVal = currVal + neighbor.getTile().coins();
-                neighPath.add(curr.getEdge(neighbor));
-                if(!visited.containsKey(neighbor)){
-                    visited.put(neighbor, neighPath);
-                    frontier.add(neighbor);
-                    bestPaths.add(neighPath, nVal);
-                } else{
-                    if(nVal > bestPaths.peekAtPriority() ){
-                        bestPaths.changePriority(neighPath, nVal);
-                    }
-                }
-            }
-        } return bestPaths.extractMin();
     }
 
     /**
@@ -194,12 +113,12 @@ public class McDiver implements SewerDiver {
         Set<Node> nodeSet = new HashSet<>(s.allNodes());
         Maze graph = new Maze(nodeSet);
         Node start = s.currentNode();
-        //Heap<List<Edge>> pQueue = new Heap<>(false);
-        PQueue<List<Edge>> pQueue = new SlowPQueue<>();
+        Heap<List<Edge>> pQueue = new Heap<>(false);
+        //PQueue<List<Edge>> pQueue = new SlowPQueue<>();
+        ShortestPaths<Node, Edge> ssp = new ShortestPaths<>(graph);
+        ssp.singleSourceDistances(start);
         for(Node n: s.allNodes()){
             if(n.getTile().coins() > 0){
-                ShortestPaths<Node, Edge> ssp = new ShortestPaths<>(graph);
-                ssp.singleSourceDistances(start);
                 //ssp.getDistance(n)
                 pQueue.add(ssp.bestPath(n), (n.getTile().coins()/ ssp.getDistance(n)));
             }
@@ -216,7 +135,7 @@ public class McDiver implements SewerDiver {
      * current location to the exit.
      */
 
-    public void maxScramGreedy(ScramState s){
+    public void maxScram(ScramState s){
         Set<Node> nodeSet = new HashSet<>(s.allNodes());
         Maze graph = new Maze(nodeSet);
         Node exit = s.exit();
@@ -299,7 +218,7 @@ public class McDiver implements SewerDiver {
     }
 
     /**
-     * A version of scram optimized to for large mazes with a coin density of 0.99
+     * A version of scram optimized to for large mazes (400x400) with a coin density of 0.99
      * optimalScram() should run noticeably faster than maxScram on such mazes
      * optimalScram() walks McDiver randomly around the maze using a dfs
      * until he is about to run out of steps.
@@ -331,6 +250,41 @@ public class McDiver implements SewerDiver {
         }
     }
 
-
+    public void optimalScram2(ScramState s){
+        Set<Node> nodeSet = new HashSet<>(s.allNodes());
+        Maze graph = new Maze(nodeSet);
+        Node start = s.currentNode();
+        Node exit = s.exit();
+        Set<Node> visited = new HashSet<>();
+        Stack<Node> stk = new Stack<>();
+        stk.push(start);
+        visited.add(start);
+        while(!stk.isEmpty()){
+            ShortestPaths<Node, Edge> ssp = new ShortestPaths<>(graph);
+            ssp.singleSourceDistances(s.currentNode());
+            List<Edge> pathToExit = ssp.bestPath(exit);
+            Node curr = stk.peek();
+            boolean found = false;
+            for(Node neighbor: curr.getNeighbors()){
+                if(s.stepsToGo() <= ssp.getDistance(exit) + curr.getEdge(neighbor).length()*2){
+                    for(Edge e: pathToExit){
+                        s.moveTo(e.destination());
+                    }
+                    return;
+                }
+                if(!visited.contains(neighbor)){
+                    stk.push(neighbor);
+                    visited.add(neighbor);
+                    found = true;
+                    s.moveTo(stk.peek());
+                    break;
+                }
+            }
+            if(!found){
+                stk.pop();
+                s.moveTo(stk.peek());
+            }
+        }
+    }
 
 }

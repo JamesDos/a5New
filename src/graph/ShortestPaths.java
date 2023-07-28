@@ -78,6 +78,9 @@ public class ShortestPaths<Vertex, Edge> {
                         if(checker.get(neighbor)) {
                             frontier.changePriority(neighbor, dist);
                         }
+                        //if(frontier.toStringValues().contains(neighbor.toString())){
+                            //frontier.changePriority(neighbor, dist);
+                        //}
                     }
                 }
             }
