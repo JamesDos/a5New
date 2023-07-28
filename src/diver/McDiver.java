@@ -6,6 +6,7 @@ import datastructures.SlowPQueue;
 import game.*;
 import graph.ShortestPaths;
 import graph.WeightedDigraph;
+import java.nio.file.NotDirectoryException;
 import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -79,8 +80,8 @@ public class McDiver implements SewerDiver {
         //vanillaScram(state);
         //maxScram(state);
         //aPath(state);
-        //optimalScram(state, new HashSet<>());
-        optimalScram2(state);
+        optimizedScram(state);
+        //optimizedScram2(state, new HashSet<>());
 
     }
     /**
@@ -218,39 +219,15 @@ public class McDiver implements SewerDiver {
     }
 
     /**
-     * A version of scram optimized to for large mazes (400x400) with a coin density of 0.99
-     * optimalScram() should run noticeably faster than maxScram on such mazes
-     * optimalScram() walks McDiver randomly around the maze using a dfs
-     * until he is about to run out of steps.
+     * A version of scram optimized to for large mazes (100x100) with a coin density of 0.99
+     * optimizedScram() should run noticeably faster than maxScram() on such mazes while
+     * scoring more than vanillaScram()
+     * optimizedScram() walks McDiver randomly around the maze using an iterative dfs (implemented
+     * using a stack) until he is about to run out of steps.
      * If McDiver is about to run out of steps, he takes the shortest path from his current
      * location to the exit; this path is calculated each time McDiver takes a step.
      */
-    public void optimalScram(ScramState s, HashSet<Node> visited){
-        Set<Node> nodeSet = new HashSet<>(s.allNodes());
-        Maze graph = new Maze(nodeSet);
-        Node exit = s.exit();
-        Node curr = s.currentNode();
-        ShortestPaths<Node, Edge> ssp = new ShortestPaths<>(graph);
-        ssp.singleSourceDistances(curr);
-        List<Edge> pathToExit = ssp.bestPath(exit);
-        visited.add(curr);
-        for(Node neighbor: curr.getNeighbors()){
-            if(s.stepsToGo() <= ssp.getDistance(exit) + curr.getEdge(neighbor).length()*2){
-                for(Edge e: pathToExit){
-                    s.moveTo(e.destination());
-                }
-                return;
-            }
-            if(!visited.contains(neighbor)){
-                s.moveTo(neighbor);
-                optimalScram(s, visited);
-                if(s.currentNode().equals(exit)) return;
-                s.moveTo(curr);
-            }
-        }
-    }
-
-    public void optimalScram2(ScramState s){
+    public void optimizedScram(ScramState s){
         Set<Node> nodeSet = new HashSet<>(s.allNodes());
         Maze graph = new Maze(nodeSet);
         Node start = s.currentNode();
@@ -283,6 +260,38 @@ public class McDiver implements SewerDiver {
             if(!found){
                 stk.pop();
                 s.moveTo(stk.peek());
+            }
+        }
+    }
+
+    /**
+     * A second version of optimizedScram() that has the same behavior as optimizedScram() but
+     * uses a recursive dfs to walk McDiver around the maze rather than an iterative dfs
+     * NOTE, optimizedScram() was used to report final times in the handout since optimizedScram2()
+     * threw a stack overflow error for larger mazes.
+     */
+
+    public void optimizedScram2(ScramState s, HashSet<Node> visited){
+        Set<Node> nodeSet = new HashSet<>(s.allNodes());
+        Maze graph = new Maze(nodeSet);
+        Node exit = s.exit();
+        Node curr = s.currentNode();
+        ShortestPaths<Node, Edge> ssp = new ShortestPaths<>(graph);
+        ssp.singleSourceDistances(curr);
+        List<Edge> pathToExit = ssp.bestPath(exit);
+        visited.add(curr);
+        for(Node neighbor: curr.getNeighbors()){
+            if(s.stepsToGo() <= ssp.getDistance(exit) + curr.getEdge(neighbor).length()*2){
+                for(Edge e: pathToExit){
+                    s.moveTo(e.destination());
+                }
+                return;
+            }
+            if(!visited.contains(neighbor)){
+                s.moveTo(neighbor);
+                optimizedScram2(s, visited);
+                if(s.currentNode().equals(exit)) return;
+                s.moveTo(curr);
             }
         }
     }
