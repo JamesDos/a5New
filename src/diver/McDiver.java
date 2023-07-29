@@ -81,18 +81,17 @@ public class McDiver implements SewerDiver {
         // TODO: Get out of the sewer system before the steps are used up.
         // DO NOT WRITE ALL THE CODE HERE. Instead, write your method elsewhere,
         // with a good specification, and call it from this one.
+
         //vanillaScram(state);
         maxScram(state);
-        //aPath(state);
         //optimizedScram(state);
         //optimizedScram2(state, new HashSet<>());
-
     }
 
     /**
-     * Helper method used by scram() that uses dijkstra's to walk McDiver to exit along the shortest
-     * possible path. Most basic version of scram; does not take into consideration coin's values or
-     * distances
+     * Helper method used by scram() that uses dijkstra's to calculate the shortest path from
+     * McDiver's starting tile to the exit and then walks McDiver along this path. Most basic
+     * version of scram; does not take into consideration coin's values or distances.
      */
     private void vanillaScram(ScramState s) {
         Set<Node> nodeSet = new HashSet<>(s.allNodes());
@@ -108,7 +107,7 @@ public class McDiver implements SewerDiver {
     }
 
     /**
-     * Helper method used by maxScramGreedy() that is an optimized version of basicScram() Returns a
+     * Helper method used by maxScram() that is an optimized version of basicScram(). Returns a
      * priority queue of a list of edges representing the best paths from McDiver's current location
      * to any coin in the Maze. Path priorities are calculated based off of the value of the coin
      * divided by the distance McDiver would have to travel in order to collect the coin.
@@ -136,7 +135,8 @@ public class McDiver implements SewerDiver {
      * coins, and finally to the exit. This method calls pathToCoin() to find the best path from
      * McDiver's current location to the coin with the highest priority and walks McDiver along that
      * path. If McDiver is about to run out of steps, McDiver will take the shortest path from his
-     * current location to the exit.
+     * current location to the exit. McDiver calculates this shortest path every time he takes a
+     * step.
      */
 
     private void maxScram(ScramState s) {
@@ -174,53 +174,6 @@ public class McDiver implements SewerDiver {
                 s.moveTo(e.destination());
             }
         }
-    }
-
-    private static void aPath(ScramState s) {
-        // Initialize a map for 0(1) lookup of cost of each node
-        Map<Node, Integer> aMap = new HashMap<>();
-
-        // Initialize each node as key and its cost as the value
-        for (Node node : s.allNodes()) {
-            aMap.put(node, nodeCost(s.currentNode(), s.exit(), node));
-        }
-
-        Stack<Node> discovered = new Stack<>();
-
-        boolean isDone = false;
-        while (!isDone) {
-            Node moveNode = s.currentNode();
-            discovered.push(moveNode);
-            int min = 0;
-            // Look through list of available neighbors and compare their cost
-            // picks the node with the lowest cost and not in discovered list
-            for (Node node : s.currentNode().getNeighbors()) {
-                if (min == 0) {
-                    min = aMap.get(node);
-                    moveNode = node;
-                }
-                if (aMap.get(node) < min && (!node.equals((discovered.peek())))) {
-                    System.out.println(discovered);
-                    moveNode = node;
-                    System.out.println(moveNode);
-                }
-            }
-            s.moveTo(moveNode);
-            if (s.currentNode().getTile().type() == Tile.TileType.RING) {
-                isDone = true;
-            }
-        }
-    }
-
-    private static Integer nodeCost(Node start, Node exit, Node currNode) {
-        // Find manhattan distance from start to node
-        int gCost = Math.abs((start.getTile().row() - currNode.getTile().row()) +
-                (start.getTile().column() - currNode.getTile().column()));
-        // Find manhattan distance from exit to node
-        int hCost = Math.abs((exit.getTile().row() - currNode.getTile().row()) +
-                (exit.getTile().column() - currNode.getTile().column()));
-
-        return gCost + hCost;
     }
 
     /**
@@ -270,7 +223,7 @@ public class McDiver implements SewerDiver {
 
     /**
      * A second version of optimizedScram() that has the same behavior as optimizedScram() but uses
-     * a recursive dfs to walk McDiver around the maze rather than an iterative dfs NOTE,
+     * a recursive dfs to walk McDiver around the maze rather than an iterative dfs. NOTE,
      * optimizedScram() was used to report final times in the handout since optimizedScram2() threw
      * a stack overflow error for larger mazes.
      */

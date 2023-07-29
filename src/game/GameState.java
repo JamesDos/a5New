@@ -21,8 +21,9 @@ import gui.GUI;
 
 import javax.swing.*;
 
-/** The game controller. The diver algorithm calls into this class to move the diver around,
- *  through the SeekState and ScramState interfaces.
+/**
+ * The game controller. The diver algorithm calls into this class to move the diver around, through
+ * the SeekState and ScramState interfaces.
  */
 public class GameState implements SeekState, ScramState {
 
@@ -39,12 +40,12 @@ public class GameState implements SeekState, ScramState {
     /**
      * minimum and maximum number of rows
      */
-    public static final int MIN_ROWS = 100, MAX_ROWS = 100;
+    public static final int MIN_ROWS = 8, MAX_ROWS = 25;
 
     /**
      * minimum and maximum number of columns
      */
-    public static final int MIN_COLS = 100, MAX_COLS = 100;
+    public static final int MIN_COLS = 12, MAX_COLS = 40;
 
     /**
      * Minimum and maximum bonuses
@@ -159,20 +160,25 @@ public class GameState implements SeekState, ScramState {
             SwingUtilities.invokeLater(() -> {
                 gui = Maybe.some(new GUI(seekSewer, position.getTile().row(),
                         position.getTile().column(), seed, this));
-                synchronized (mutex) { mutex.notifyAll(); }
+                synchronized (mutex) {
+                    mutex.notifyAll();
+                }
             });
             // Wait for the GUI setup to complete
             synchronized (mutex) {
                 try {
-                    while (!gui.isPresent()) mutex.wait();
-                } catch (InterruptedException exc) {}
+                    while (!gui.isPresent()) {
+                        mutex.wait();
+                    }
+                } catch (InterruptedException exc) {
+                }
             }
         }
     }
 
     /**
-     * Run through the game, one step at a time. Will run scram() only
-     * if seek() succeeds. Will fail in case of timeout.
+     * Run through the game, one step at a time. Will run scram() only if seek() succeeds. Will fail
+     * in case of timeout.
      */
     void runWithTimeLimit() {
         seekWithTimeLimit();
@@ -248,8 +254,8 @@ public class GameState implements SeekState, ScramState {
         }
     }
 
-    /** If the GUI is active, perform some action to the gui object,
-     *  on the event dispatch thread.
+    /**
+     * If the GUI is active, perform some action to the gui object, on the event dispatch thread.
      */
     void onGUI(Consumer<GUI> code) {
         SwingUtilities.invokeLater(() -> gui.thenDo(code));
@@ -513,9 +519,9 @@ public class GameState implements SeekState, ScramState {
     }
 
     /**
-     * Attempt to move the sewerDiver from the current position to the {@code Node n}. Throw {@code
-     * IllegalArgumentException} if {@code n} is not neighboring. Increment the steps taken if
-     * successful.
+     * Attempt to move the sewerDiver from the current position to the {@code Node n}. Throw
+     * {@code IllegalArgumentException} if {@code n} is not neighboring. Increment the steps taken
+     * if successful.
      */
     @Override
     public void moveTo(Node n) {
@@ -534,7 +540,7 @@ public class GameState implements SeekState, ScramState {
         position = n;
         stepsToGo -= distance;
         GUIControl.startAnimation(gui);
-        onGUI(g-> {
+        onGUI(g -> {
             g.updateStepsToGo(stepsToGo);
             g.moveTo(n);
         });
@@ -594,10 +600,14 @@ public class GameState implements SeekState, ScramState {
     boolean getSeekTimeout() {
         return seekTimedOut;
     }
-    boolean getScramTimeout() { return scramTimedOut; }
+
+    boolean getScramTimeout() {
+        return scramTimedOut;
+    }
+
     /**
-     * Given seed, whether to use the GUI, and an instance of a solution, run the
-     * game using that solution.
+     * Given seed, whether to use the GUI, and an instance of a solution, run the game using that
+     * solution.
      */
     public static int runNewGame(long seed, boolean useGui, SewerDiver solution) {
         GameState state;

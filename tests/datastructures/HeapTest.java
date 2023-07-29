@@ -134,5 +134,41 @@ public class HeapTest {
         assertEquals("[23, 19, 11, 13, 17, 21, 9, 1, 7, 5, 15, 3, 0]", maxHeap.toStringValues());
         minHeap.changePriority(9, 21.0);
         assertEquals("[1, 3, 5, 7, 19, 11, 13, 15, 17, 9, 21, 23, 25]", minHeap.toStringValues());
+
+        // Edge cases
+        //Adding / Removing from heaps of size 0 and 1
+        minHeap = new Heap<>(true);
+        maxHeap = new Heap<>(false);
+        minHeap.add(2, 2.0);
+        maxHeap.add(2, 2.0);
+        minHeap.extractMin();
+        maxHeap.extractMin();
+        minHeap.add(2, 2.0);
+        maxHeap.add(2, 2.0);
+        // Adding causes change in priority for heaps of size 1 (bubbling up);
+        minHeap.add(1, 1.0);
+        maxHeap.add(3, 3.0);
+        assertEquals(1, minHeap.peek());
+        assertEquals(3, maxHeap.peek());
+        // Removing root node causes the leaf node to be new root for heap of size 2 (bubbling down)
+        minHeap.extractMin();
+        maxHeap.extractMin();
+        assertEquals(2, minHeap.peek());
+        assertEquals(2, maxHeap.peek());
+        // Changing priority for heaps of size 1 (shouldn't cause bubbling up or down)
+        minHeap.changePriority(2, 1);
+        maxHeap.changePriority(2, 3);
+        assertEquals(1, minHeap.peekAtPriority());
+        assertEquals(3, maxHeap.peekAtPriority());
+        // Changing priority to negative values
+        minHeap.changePriority(2, -2.0);
+        maxHeap.changePriority(2, -2.0);
+        // Bubbling up/down should work with negative priorities
+        minHeap.add(-3, -3.0);
+        maxHeap.add(-1, -1.0);
+        assertEquals(-3, minHeap.extractMin());
+        assertEquals(-1, maxHeap.extractMin());
+        assertEquals(2, minHeap.peek());
+        assertEquals(2, maxHeap.peek());
     }
 }
